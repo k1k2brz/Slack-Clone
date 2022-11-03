@@ -1,0 +1,9 @@
+npm i react react-dom
+npm i typescript
+npm i @types/react @types/react-dom
+npm i -D eslint
+npm i -D prettier
+npm i eslint-plugin-prettier eslint-config-prettier
+npm i -D webpack @babel/core babel-loader @babel/preset-react
+npm i -D @types/webpack @types/node @babel/preset-typescript
+npm i style-loader css-loader
