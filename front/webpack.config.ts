@@ -34,6 +34,7 @@ const config: Configuration = {
       {
         test: /\.tsx?$/,
         loader: 'babel-loader',
+        // use: ['source-map-loader'],
         options: {
           presets: [
             [
@@ -67,32 +68,42 @@ const config: Configuration = {
       //   files: "./src/**/*",
       // },
     }),
+    // new HtmlWebpackPlugin({
+    //   template: './index.html',
+    //   filename: 'index.html',
+    //   inject: true,
+    //   chunks: ['index']
+    // }),
     new webpack.EnvironmentPlugin({ NODE_ENV: isDevelopment ? 'development' : 'production' }),
   ],
   output: {
     path: path.join(__dirname, 'dist'),
     filename: '[name].js',
     publicPath: '/dist/',
+    // sourceMapFilename: '[name].js.map',
   },
   devServer: {
     historyApiFallback: true, // react router
     port: 3090,
     devMiddleware: { publicPath: '/dist/' },
     static: { directory: path.resolve(__dirname) },
-    // proxy: {
-    //   '/api/': {
-    //     target: 'http//localhost:3095',
-    //     changeOrigin: true,
-    //   }
-    // }
+    proxy: {
+      '/api/': {
+        target: 'http://localhost:3095',
+        changeOrigin: true,
+      },
+    },
   },
 };
 
 if (isDevelopment && config.plugins) {
   config.plugins.push(new webpack.HotModuleReplacementPlugin());
   config.plugins.push(new ReactRefreshWebpackPlugin());
+  // config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'server', openAnalyzer: true }));
 }
 if (!isDevelopment && config.plugins) {
+  config.plugins.push(new webpack.LoaderOptionsPlugin({ minimize: true }));
+  // config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
 }
 
 export default config;
