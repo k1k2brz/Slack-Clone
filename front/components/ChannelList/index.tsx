@@ -2,14 +2,15 @@ import { CollapseButton } from '@components/DMList/styles';
 // import EachChannel from '@components/EachChannel';
 import { IChannel, IUser } from '@typings/db';
 import fetcher from '@utils/fetcher';
-import React, { FC, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router';
+import { NavLink } from 'react-router-dom';
 import useSWR from 'swr';
 
 const ChannelList: React.FC = () => {
     const { workspace } = useParams<{ workspace?: string }>();
     const [channelCollapse, setChannelCollapse] = useState(false);
-    const { data: userData } = useSWR<IUser>('/api/users', fetcher, {
+    const { data: userData, error, mutate } = useSWR<IUser>('/api/users', fetcher, {
         dedupingInterval: 2000,
     });
     // 캐싱된 데이터를 쓰기 때문에
@@ -32,12 +33,20 @@ const ChannelList: React.FC = () => {
                 </CollapseButton>
                 <span>Channels</span>
             </h2>
-            {/* <div>
-        {!channelCollapse &&
-          channelData?.map((channel) => {
-            return <EachChannel key={channel.id} channel={channel} />;
-          })}
-      </div> */}
+            <div>
+                {!channelCollapse &&
+                    channelData?.map((channel) => {
+                        return (
+                            <NavLink
+                                key={channel.name}
+                                className={({ isActive }) => (isActive ? "selected" : "")}
+                                to={`/workspace/${workspace}/channel/${channel.name}`}
+                            >
+                                <span># {channel.name}</span>
+                            </NavLink>
+                        );
+                    })}
+            </div>
         </>
     );
 };

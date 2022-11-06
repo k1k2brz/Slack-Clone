@@ -3,7 +3,7 @@ import {
     ProfileModal, RightMenu, WorkspaceButton, WorkspaceModal, WorkspaceName, Workspaces, WorkspaceWrapper
 } from '@layouts/Workspace/styles'
 import fetcher from '@utils/fetcher';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import axios from 'axios'
 import gravatar from 'gravatar'
@@ -23,6 +23,7 @@ import InviteWorkspaceModal from '@components/InviteWorkspaceModal';
 import InviteChannelModal from '@components/InviteChannelModal';
 import ChannelList from '@components/ChannelList';
 import DMList from '@components/DMList';
+import useSocket from '@hooks/useSocket';
 
 const Channel = loadable(() => import('@pages/Ch'));
 const DirectMessage = loadable(() => import('@pages/DirectMessage'));
@@ -46,7 +47,7 @@ const Workspace = () => {
 
     const { workspace } = useParams<{ workspace: string }>();
     // 변수 명 바꾸기
-    // <IUser | false>
+    // 다른곳에 복붙해도 SWR이 전역으로 공유 될 것
     const { data: userData, error, mutate: revalidateUser } = useSWR<IUser | false>('/api/users', fetcher, {
         dedupingInterval: 2000, // 2초안에 같은게 호출 되면 캐시 된 것들 그대로 가져다 씀
     });
@@ -54,6 +55,23 @@ const Workspace = () => {
     // 조건부로 만들어서 내가 로그인 했을 때 채널 가져오고 안했을 때 안가져오게
     const { data: channelData } = useSWR<IChannel[]>(
         userData ? `/api/workspaces/${workspace}/channels` : null, fetcher);
+
+    // const { data: memberData } = useSWR<IUser[]>(userData ? `/api/workspaces/${workspace}/members` : null, fetcher);
+    const [socket, disconnect] = useSocket(workspace); // hook의 return은 맘대로
+
+    useEffect(() => {
+        if (channelData && userData && socket) {
+            console.log(socket);
+            socket.emit('login', { id: userData.id, channels: channelData.map((v) => v.id) });
+        }
+    }, [socket, channelData, userData]);
+    useEffect(() => {
+        return () => {
+            disconnect();
+        };
+        // useEffect에 쓰이지 않은 변수도 넣어줘야 하는 경우
+        // workspace가 바뀔 때
+    }, [workspace, disconnect]);
 
     const onLogout = useCallback(() => {
         console.log(userData)
@@ -66,7 +84,7 @@ const Workspace = () => {
             .catch((err) => {
                 console.log(err)
             })
-    }, [])
+    }, [revalidateUser])
 
     // toggle 이렇게 가능
     const onClickUserProfile = useCallback(() => {
@@ -140,14 +158,13 @@ const Workspace = () => {
         <div>
             <Header>
                 <RightMenu>
-
                     <span onClick={onClickUserProfile}>
                         {/* gravatar설치 후 랜덤 아이콘 */}
                         <ProfileImg src={gravatar.url(userData.email, { s: '28px', d: 'retro' })} alt={userData.nickname} />
                         {/* toggle */}
                         {showUserMenu && (<Menu style={{ right: 0, top: 38 }} show={showUserMenu} onCloseModal={onCloseUserProfile}>
                             <ProfileModal>
-                                <img src={gravatar.url(userData.email, { s: '28px', d: 'retro' })} alt={userData.nickname} />
+                                <img src={gravatar.url(userData.nickname, { s: '28px', d: 'retro' })} alt={userData.nickname} />
                                 <div>
                                     <span id="profile-name">{userData.nickname}</span>
                                     <span id="profile-active">Active</span>
@@ -188,8 +205,8 @@ const Workspace = () => {
                 </Channels>
                 <Chats>
                     <Routes>
-                        <Route path='/workspace/:workspace/channel/:channel/*' element={<Channel />} />
-                        <Route path='/workspace/:workspace/dm/:id/*' element={<><DirectMessage /></>} />
+                        <Route path='/channel/:channel' element={<Channel />} />
+                        <Route path='/dm/:id' element={<DirectMessage />} />
                     </Routes>
                 </Chats>
             </WorkspaceWrapper>

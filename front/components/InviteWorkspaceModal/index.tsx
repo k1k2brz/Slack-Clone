@@ -15,10 +15,10 @@ interface Props {
     setShowInviteWorkspaceModal: (flag: boolean) => void;
 }
 const InviteWorkspaceModal: FC<Props> = ({ show, onCloseModal, setShowInviteWorkspaceModal }) => {
-    const { workspace } = useParams<{ workspace: string; channel: string }>();
+    const { workspace } = useParams<{ workspace: string }>();
     const [newMember, onChangeNewMember, setNewMember] = useInput('');
     const { data: userData } = useSWR<IUser>('/api/users', fetcher);
-    const { mutate: revalidateMember } = useSWR<IChannel[] | false>(
+    const { mutate: revalidateMember } = useSWR<IChannel[]>(
         userData ? `/api/workspaces/${workspace}/members` : null,
         fetcher,
     );
@@ -34,7 +34,8 @@ const InviteWorkspaceModal: FC<Props> = ({ show, onCloseModal, setShowInviteWork
                     email: newMember,
                 })
                 .then((response) => {
-                    revalidateMember(false);
+                    console.log(response.data)
+                    revalidateMember();
                     setShowInviteWorkspaceModal(false);
                     setNewMember('');
                 })
