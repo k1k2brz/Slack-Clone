@@ -1,4 +1,5 @@
 import { CollapseButton } from '@components/DMList/styles';
+import EachChannel from '@components/EachChannel';
 // import EachChannel from '@components/EachChannel';
 import { IChannel, IUser } from '@typings/db';
 import fetcher from '@utils/fetcher';
@@ -36,15 +37,8 @@ const ChannelList: React.FC = () => {
             <div>
                 {!channelCollapse &&
                     channelData?.map((channel) => {
-                        return (
-                            <NavLink
-                                key={channel.name}
-                                className={({ isActive }) => (isActive ? "selected" : "")}
-                                to={`/workspace/${workspace}/channel/${channel.name}`}
-                            >
-                                <span># {channel.name}</span>
-                            </NavLink>
-                        );
+                        // 별도 컴포넌트로 분리하는게 최적화 할 때 좀 더 편리
+                        return <EachChannel key={channel.id} channel={channel} />;
                     })}
             </div>
         </>

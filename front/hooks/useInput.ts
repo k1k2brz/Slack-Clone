@@ -20,7 +20,8 @@ type ReturnTypes<T> = [T, (e: React.ChangeEvent<HTMLInputElement>) => void, Disp
 const useInput = <T>(initialData: T): ReturnTypes<T> => {
   const [value, setValue] = useState(initialData);
   const handler = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue((e.target.value as unknown) as T);
+    // 타입 강제변경 (any보다 낫지만 권장하지는 않음)
+    setValue(e.target.value as unknown as T);
   }, []);
   return [value, handler, setValue];
 };

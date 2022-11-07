@@ -6,7 +6,7 @@ const backUrl = 'http://localhost:3095';
 // ts는 빈 배열일 경우 타이핑 해줘야한다.
 const sockets: { [key: string]: SocketIOClient.Socket } = {};
 const useSocket = (workspace?: string): [SocketIOClient.Socket | undefined, () => void] => {
-  console.log('rerender', workspace);
+  // console.log('rerender', workspace);
   const disconnect = useCallback(() => {
     if (workspace) {
       sockets[workspace].disconnect();

@@ -58,6 +58,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/socket.io-client": "^1.4.35",
     "@types/webpack": "^5.28.0",
+    "@types/webpack-bundle-analyzer": "^4.6.0",
     "@types/webpack-dev-server": "^4.7.2",
     "babel-loader": "^9.0.1",
     "eslint": "^8.26.0",
